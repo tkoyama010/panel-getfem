@@ -7,12 +7,16 @@ pv.set_plot_theme("document")
 pn.extension()
 
 m = gf.Mesh("import", "gid", "tripod.GiD.msh")
+m.export_to_vtk("tripod.vtk", "ascii")
 
 tabs = pn.Tabs(
-    ("Mesh", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
+    ("Mesh", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
     ("Model", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
 )
 
-pn.Row(
-    tabs,
-).show()
+template = pn.template.MaterialTemplate(
+    title='GetFEM',
+    sidebar=[tabs],
+)
+
+template.servable()
