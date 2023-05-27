@@ -8,8 +8,8 @@ from IPython.display import IFrame
 pv.set_plot_theme("document")
 pn.extension()
 
-filename = os.path.join(os.path.dirname(__file__), "tripod.GiD.msh")
-m = gf.Mesh("import", "gid", filename)
+file_name = os.path.join(os.path.dirname(__file__), "tripod.GiD.msh")
+m = gf.Mesh("import", "gid", file_name)
 m.export_to_vtk("tripod.vtk", "ascii")
 
 mesh = pv.read("tripod.vtk")
@@ -19,6 +19,7 @@ plotter.add_mesh(mesh)
 def handler(viewer, src, **kwargs):
     return IFrame(src, "100%", "1000px")
 
+file_input = pn.widgets.FileInput()
 
 iframe = plotter.show(
     jupyter_backend="trame",
@@ -27,7 +28,7 @@ iframe = plotter.show(
 )
 
 tabs = pn.Tabs(
-    ("Mesh", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
+    ("Mesh", file_input),
     ("Model", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
 )
 
