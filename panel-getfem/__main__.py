@@ -1,3 +1,5 @@
+import os
+
 import getfem as gf
 import panel as pn
 import pyvista as pv
@@ -6,7 +8,8 @@ from IPython.display import IFrame
 pv.set_plot_theme("document")
 pn.extension()
 
-m = gf.Mesh("import", "gid", "tripod.GiD.msh")
+filename = os.path.join(os.path.dirname(__file__), "tripod.GiD.msh")
+m = gf.Mesh("import", "gid", filename)
 m.export_to_vtk("tripod.vtk", "ascii")
 
 mesh = pv.read("tripod.vtk")
