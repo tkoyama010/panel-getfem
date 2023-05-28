@@ -19,7 +19,7 @@ class GetFEMViewer(param.Parameterized):
     plotter = pv.Plotter(notebook=True)
     file_input = pn.widgets.FileInput()
 
-    @param.depends("file_input.value", watch=True)
+    @param.depends("file_input.value")
     def view(self):
         if self.file_input.value is not None:
             s = self.file_input.value.decode("utf-8")
