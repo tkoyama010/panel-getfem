@@ -37,7 +37,8 @@ viewer = GetFEMViewer(name="GetFEM Viewer")
 
 tabs = pn.Tabs(
     ("Mesh", viewer.file_input),
-    ("Model", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
+    ("Model", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
+    ("View", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
 )
 
 template = pn.template.MaterialTemplate(
