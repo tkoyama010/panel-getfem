@@ -8,7 +8,7 @@ pv.set_plot_theme("document")
 pn.extension()
 
 
-class GetFEMViewer(param.Parameterized):
+class Veiewer(param.Parameterized):
     plotter = pv.Plotter(notebook=True)
     file_input = pn.widgets.FileInput()
 
@@ -33,7 +33,7 @@ class GetFEMViewer(param.Parameterized):
         return iframe
 
 
-viewer = GetFEMViewer(name="GetFEM Viewer")
+viewer = Veiewer(name="Viewer")
 
 tabs = pn.Tabs(
     ("Mesh", viewer.file_input),
@@ -42,7 +42,7 @@ tabs = pn.Tabs(
 )
 
 template = pn.template.MaterialTemplate(
-    title="GetFEM",
+    title="panel-getfem",
     sidebar=[tabs],
     main=[pn.panel(viewer.view, width=1500, height=250)],
 )
