@@ -1,23 +1,19 @@
-import os
-import io
-
 import getfem as gf
 import panel as pn
-import pyvista as pv
 import param
-
+import pyvista as pv
 from IPython.display import IFrame
 
 pv.set_plot_theme("document")
 pn.extension()
 
-def handler(viewer, src, **kwargs):
-    return IFrame(src, "100%", "1000px")
 
 class GetFEMViewer(param.Parameterized):
-
     plotter = pv.Plotter(notebook=True)
     file_input = pn.widgets.FileInput()
+
+    def handler(self, viewer, src, **kwargs):
+        return IFrame(src, "100%", "1000px")
 
     @param.depends("file_input.value")
     def view(self):
@@ -26,12 +22,12 @@ class GetFEMViewer(param.Parameterized):
             m = gf.Mesh("from string", s)
             m.export_to_vtk("mesh.vtk", "ascii")
             mesh = pv.read("mesh.vtk")
-    
+
             self.plotter.clear()
             self.plotter.add_mesh(mesh)
         iframe = self.plotter.show(
             jupyter_backend="trame",
-            jupyter_kwargs=dict(handler=handler),
+            jupyter_kwargs=dict(handler=self.handler),
             return_viewer=True,
         )
         return iframe
@@ -45,7 +41,7 @@ tabs = pn.Tabs(
 )
 
 template = pn.template.MaterialTemplate(
-    title='GetFEM',
+    title="GetFEM",
     sidebar=[tabs],
     main=[pn.panel(viewer.view, width=1500, height=250)],
 )
