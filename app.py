@@ -42,7 +42,7 @@ tabs = pn.Tabs(
 )
 
 template = pn.template.MaterialTemplate(
-    title="panel-getfem",
+    title="GetFEM Interactive",
     sidebar=[tabs],
     main=[pn.panel(viewer.view, width=1500, height=250)],
 )
