@@ -96,10 +96,12 @@ pn.Column(
     title,
     pn.Tabs(
         (
-            "Mesh",
-            pn.Row(mesh.param, pn.panel(mesh.view, width=1000, height=250)),
+            "Model",
+            pn.Row(
+                pn.Column(mesh.param, fem.param, integ.param),
+                pn.panel(mesh.view, width=1000, height=250),
+            ),
         ),
-        ("Model", pn.Row(fem.param, integ.param)),
         (
             "Solution",
             pn.Row(
