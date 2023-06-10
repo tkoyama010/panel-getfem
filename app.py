@@ -15,25 +15,12 @@ class Mesh(param.Parameterized):
             "tripod.mesh",
         ],
     )
-    plotter = pv.Plotter(notebook=True)
-
-    def handler(self, viewer, src, **kwargs):
-        return IFrame(src, "100%", "1000px")
 
     @param.depends("file_name")
-    def view(self):
+    def view(self, plotter):
         m = gf.Mesh("load", self.file_name)
         m.export_to_vtk(str(id(self)) + ".vtk", "ascii")
-        mesh = pv.read(str(id(self)) + ".vtk")
-
-        self.plotter.clear()
-        self.plotter.add_mesh(mesh)
-        iframe = self.plotter.show(
-            jupyter_backend="trame",
-            jupyter_kwargs=dict(handler=self.handler),
-            return_viewer=True,
-        )
-        return iframe
+        return plotter.view(str(id(self)) + ".vtk")
 
 
 class Fem(param.Parameterized):
@@ -64,24 +51,16 @@ class Model(param.Parameterized):
     )
 
 
-class Solution(param.Parameterized):
-    file_name = param.ObjectSelector(
-        default="tripod.vtk",
-        objects=[
-            "tripod.vtk",
-        ],
-    )
+class Plotter(param.Parameterized):
     plotter = pv.Plotter(notebook=True)
 
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("file_name")
-    def view(self):
-        solution = pv.read(self.file_name)
-
+    def view(self, file_name):
+        mesh = pv.read(file_name)
         self.plotter.clear()
-        self.plotter.add_mesh(solution)
+        self.plotter.add_mesh(mesh)
         iframe = self.plotter.show(
             jupyter_backend="trame",
             jupyter_kwargs=dict(handler=self.handler),
@@ -94,21 +73,20 @@ mesh = Mesh(name="Mesh")
 fem = Fem(name="Fem")
 integ = Integ(name="Integ")
 model = Model(name="Model")
-solution = Solution(name="Solution")
+plotter = Plotter(name="Plotter")
 
-pn.Tabs(
-    (
-        "Model",
-        pn.Row(
+pn.Row(
+    pn.Tabs(
+        (
+            "Model",
             pn.Column(mesh.param, fem.param, integ.param, model.param),
-            pn.panel(mesh.view, width=1000, height=250),
+        ),
+        (
+            "Plotter",
+            pn.Row(
+                plotter.param,
+            ),
         ),
     ),
-    (
-        "Solution",
-        pn.Row(
-            solution.param,
-            pn.panel(solution.view, width=1000, height=250),
-        ),
-    ),
+    pn.panel(mesh.view(plotter), width=1000, height=250),
 ).show()
