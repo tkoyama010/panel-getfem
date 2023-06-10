@@ -7,24 +7,29 @@ from IPython.display import IFrame
 pv.set_plot_theme("document")
 pn.extension()
 
+title = pn.pane.Markdown("# panel-getfem")
 
-class Veiewer(param.Parameterized):
+
+class MeshVeiewer(param.Parameterized):
+    mesh_name = param.ObjectSelector(
+        default="tripod.mesh",
+        objects=[
+            "tripod.mesh",
+        ],
+    )
     plotter = pv.Plotter(notebook=True)
-    file_input = pn.widgets.FileInput()
 
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("file_input.value")
+    @param.depends("mesh_name")
     def view(self):
-        if self.file_input.value is not None:
-            s = self.file_input.value.decode("utf-8")
-            m = gf.Mesh("from string", s)
-            m.export_to_vtk("mesh.vtk", "ascii")
-            mesh = pv.read("mesh.vtk")
+        m = gf.Mesh("load", self.mesh_name)
+        m.export_to_vtk(str(id(self)) + ".vtk", "ascii")
+        mesh = pv.read(str(id(self)) + ".vtk")
 
-            self.plotter.clear()
-            self.plotter.add_mesh(mesh)
+        self.plotter.clear()
+        self.plotter.add_mesh(mesh)
         iframe = self.plotter.show(
             jupyter_backend="trame",
             jupyter_kwargs=dict(handler=self.handler),
@@ -33,18 +38,51 @@ class Veiewer(param.Parameterized):
         return iframe
 
 
-viewer = Veiewer(name="Viewer")
+class ResultVeiewer(param.Parameterized):
+    mesh_name = param.ObjectSelector(
+        default="tripod.vtk",
+        objects=[
+            "tripod.vtk",
+        ],
+    )
+    plotter = pv.Plotter(notebook=True)
 
-tabs = pn.Tabs(
-    ("Mesh", viewer.file_input),
-    ("Model", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
-    ("View", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
-)
+    def handler(self, viewer, src, **kwargs):
+        return IFrame(src, "100%", "1000px")
 
-template = pn.template.MaterialTemplate(
-    title="panel-getfem",
-    sidebar=[tabs],
-    main=[pn.panel(viewer.view, width=1500, height=250)],
-)
+    @param.depends("mesh_name")
+    def view(self):
+        mesh = pv.read(self.mesh_name)
 
-template.servable()
+        self.plotter.clear()
+        self.plotter.add_mesh(mesh)
+        iframe = self.plotter.show(
+            jupyter_backend="trame",
+            jupyter_kwargs=dict(handler=self.handler),
+            return_viewer=True,
+        )
+        return iframe
+
+
+mesh_viewer = MeshVeiewer(name="Mesh Viewer")
+result_viewer = ResultVeiewer(name="Result Viewer")
+
+pn.Column(
+    title,
+    pn.Tabs(
+        (
+            "Mesh",
+            pn.Row(
+                mesh_viewer.param, pn.panel(mesh_viewer.view, width=1000, height=250)
+            ),
+        ),
+        ("Model", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
+        (
+            "Result",
+            pn.Row(
+                result_viewer.param,
+                pn.panel(result_viewer.view, width=1000, height=250),
+            ),
+        ),
+    ),
+).show()
