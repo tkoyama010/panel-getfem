@@ -10,8 +10,8 @@ pn.extension()
 title = pn.pane.Markdown("# panel-getfem")
 
 
-class MeshVeiewer(param.Parameterized):
-    mesh_name = param.ObjectSelector(
+class Mesh(param.Parameterized):
+    file_name = param.ObjectSelector(
         default="tripod.mesh",
         objects=[
             "tripod.mesh",
@@ -22,9 +22,9 @@ class MeshVeiewer(param.Parameterized):
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("mesh_name")
+    @param.depends("file_name")
     def view(self):
-        m = gf.Mesh("load", self.mesh_name)
+        m = gf.Mesh("load", self.file_name)
         m.export_to_vtk(str(id(self)) + ".vtk", "ascii")
         mesh = pv.read(str(id(self)) + ".vtk")
 
@@ -38,8 +38,36 @@ class MeshVeiewer(param.Parameterized):
         return iframe
 
 
-class ResultVeiewer(param.Parameterized):
-    mesh_name = param.ObjectSelector(
+class Fem(param.Parameterized):
+    file_name = param.ObjectSelector(
+        default="tripod.mfu",
+        objects=[
+            "tripod.mfu",
+            "tripod.mfue",
+        ],
+    )
+
+
+class Integ(param.Parameterized):
+    file_name = param.ObjectSelector(
+        default="tripod.mim",
+        objects=[
+            "tripod.mim",
+        ],
+    )
+
+
+class Model(param.Parameterized):
+    brick_name = param.ObjectSelector(
+        default="linearized elasticity brick",
+        objects=[
+            "linearized elasticity brick",
+        ],
+    )
+
+
+class Solution(param.Parameterized):
+    file_name = param.ObjectSelector(
         default="tripod.vtk",
         objects=[
             "tripod.vtk",
@@ -50,12 +78,12 @@ class ResultVeiewer(param.Parameterized):
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("mesh_name")
+    @param.depends("file_name")
     def view(self):
-        mesh = pv.read(self.mesh_name)
+        solution = pv.read(self.file_name)
 
         self.plotter.clear()
-        self.plotter.add_mesh(mesh)
+        self.plotter.add_mesh(solution)
         iframe = self.plotter.show(
             jupyter_backend="trame",
             jupyter_kwargs=dict(handler=self.handler),
@@ -64,24 +92,27 @@ class ResultVeiewer(param.Parameterized):
         return iframe
 
 
-mesh_viewer = MeshVeiewer(name="Mesh Viewer")
-result_viewer = ResultVeiewer(name="Result Viewer")
+mesh = Mesh(name="Mesh")
+fem = Fem(name="Fem")
+integ = Integ(name="Integ")
+model = Model(name="Model")
+solution = Solution(name="Solution")
 
 pn.Column(
     title,
     pn.Tabs(
         (
-            "Mesh",
+            "Model",
             pn.Row(
-                mesh_viewer.param, pn.panel(mesh_viewer.view, width=1000, height=250)
+                pn.Column(mesh.param, fem.param, integ.param, model.param),
+                pn.panel(mesh.view, width=1000, height=250),
             ),
         ),
-        ("Model", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
         (
-            "Result",
+            "Solution",
             pn.Row(
-                result_viewer.param,
-                pn.panel(result_viewer.view, width=1000, height=250),
+                solution.param,
+                pn.panel(solution.view, width=1000, height=250),
             ),
         ),
     ),
