@@ -39,7 +39,7 @@ class MeshVeiewer(param.Parameterized):
 
 
 class ResultVeiewer(param.Parameterized):
-    mesh_name = param.ObjectSelector(
+    result_name = param.ObjectSelector(
         default="tripod.vtk",
         objects=[
             "tripod.vtk",
@@ -50,12 +50,12 @@ class ResultVeiewer(param.Parameterized):
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("mesh_name")
+    @param.depends("result_name")
     def view(self):
-        mesh = pv.read(self.mesh_name)
+        result = pv.read(self.result_name)
 
         self.plotter.clear()
-        self.plotter.add_mesh(mesh)
+        self.plotter.add_mesh(result)
         iframe = self.plotter.show(
             jupyter_backend="trame",
             jupyter_kwargs=dict(handler=self.handler),
@@ -76,7 +76,9 @@ pn.Column(
                 mesh_viewer.param, pn.panel(mesh_viewer.view, width=1000, height=250)
             ),
         ),
-        ("Model", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
+        ("Fem", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
+        ("Integ", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
+        ("Model", pn.Spacer(styles=dict(background="yellow"), width=500, height=1000)),
         (
             "Result",
             pn.Row(
