@@ -58,7 +58,12 @@ class Integ(param.Parameterized):
 
 
 class Model(param.Parameterized):
-    pass
+    brick_name = param.ObjectSelector(
+        default="linearized elasticity brick",
+        objects=[
+            "linearized elasticity brick",
+        ],
+    )
 
 
 class Solution(param.Parameterized):
@@ -87,9 +92,10 @@ class Solution(param.Parameterized):
         return iframe
 
 
+mesh = Mesh(name="Mesh")
 fem = Fem(name="Fem")
 integ = Integ(name="Integ")
-mesh = Mesh(name="Mesh")
+model = Model(name="Model")
 solution = Solution(name="Solution")
 
 pn.Column(
@@ -98,7 +104,7 @@ pn.Column(
         (
             "Model",
             pn.Row(
-                pn.Column(mesh.param, fem.param, integ.param),
+                pn.Column(mesh.param, fem.param, integ.param, model.param),
                 pn.panel(mesh.view, width=1000, height=250),
             ),
         ),
