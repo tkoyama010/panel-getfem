@@ -7,8 +7,6 @@ from IPython.display import IFrame
 pv.set_plot_theme("document")
 pn.extension()
 
-title = pn.pane.Markdown("# panel-getfem")
-
 
 class Mesh(param.Parameterized):
     file_name = param.ObjectSelector(
@@ -98,22 +96,19 @@ integ = Integ(name="Integ")
 model = Model(name="Model")
 solution = Solution(name="Solution")
 
-pn.Column(
-    title,
-    pn.Tabs(
-        (
-            "Model",
-            pn.Row(
-                pn.Column(mesh.param, fem.param, integ.param, model.param),
-                pn.panel(mesh.view, width=1000, height=250),
-            ),
+pn.Tabs(
+    (
+        "Model",
+        pn.Row(
+            pn.Column(mesh.param, fem.param, integ.param, model.param),
+            pn.panel(mesh.view, width=1000, height=250),
         ),
-        (
-            "Solution",
-            pn.Row(
-                solution.param,
-                pn.panel(solution.view, width=1000, height=250),
-            ),
+    ),
+    (
+        "Solution",
+        pn.Row(
+            solution.param,
+            pn.panel(solution.view, width=1000, height=250),
         ),
     ),
 ).show()
