@@ -47,7 +47,7 @@ class Model(param.Parameterized):
     pass
 
 
-class Result(param.Parameterized):
+class Solution(param.Parameterized):
     result_name = param.ObjectSelector(
         default="tripod.vtk",
         objects=[
@@ -74,7 +74,7 @@ class Result(param.Parameterized):
 
 
 mesh = Mesh(name="Mesh")
-result = Result(name="Result")
+result = Solution(name="Solution")
 
 pn.Column(
     title,
@@ -89,7 +89,7 @@ pn.Column(
         ("Integ", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
         ("Model", pn.Spacer(styles=dict(background="yellow"), width=500, height=1000)),
         (
-            "Result",
+            "Solution",
             pn.Row(
                 result.param,
                 pn.panel(result.view, width=1000, height=250),
