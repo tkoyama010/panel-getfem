@@ -10,8 +10,8 @@ pn.extension()
 title = pn.pane.Markdown("# panel-getfem")
 
 
-class MeshVeiewer(param.Parameterized):
-    mesh_name = param.ObjectSelector(
+class Mesh(param.Parameterized):
+    file_name = param.ObjectSelector(
         default="tripod.mesh",
         objects=[
             "tripod.mesh",
@@ -22,9 +22,9 @@ class MeshVeiewer(param.Parameterized):
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("mesh_name")
+    @param.depends("file_name")
     def view(self):
-        m = gf.Mesh("load", self.mesh_name)
+        m = gf.Mesh("load", self.file_name)
         m.export_to_vtk(str(id(self)) + ".vtk", "ascii")
         mesh = pv.read(str(id(self)) + ".vtk")
 
@@ -37,8 +37,17 @@ class MeshVeiewer(param.Parameterized):
         )
         return iframe
 
+class Fem(param.Parameterized):
+    pass
 
-class ResultVeiewer(param.Parameterized):
+class Integ(param.Parameterized):
+    pass
+
+class Model(param.Parameterized):
+    pass
+
+
+class Result(param.Parameterized):
     result_name = param.ObjectSelector(
         default="tripod.vtk",
         objects=[
@@ -64,8 +73,8 @@ class ResultVeiewer(param.Parameterized):
         return iframe
 
 
-mesh_viewer = MeshVeiewer(name="Mesh Viewer")
-result_viewer = ResultVeiewer(name="Result Viewer")
+mesh = Mesh(name="Mesh")
+result = Result(name="Result")
 
 pn.Column(
     title,
@@ -73,7 +82,7 @@ pn.Column(
         (
             "Mesh",
             pn.Row(
-                mesh_viewer.param, pn.panel(mesh_viewer.view, width=1000, height=250)
+                mesh.param, pn.panel(mesh.view, width=1000, height=250)
             ),
         ),
         ("Fem", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
@@ -82,8 +91,8 @@ pn.Column(
         (
             "Result",
             pn.Row(
-                result_viewer.param,
-                pn.panel(result_viewer.view, width=1000, height=250),
+                result.param,
+                pn.panel(result.view, width=1000, height=250),
             ),
         ),
     ),
