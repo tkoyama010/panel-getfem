@@ -48,7 +48,7 @@ class Model(param.Parameterized):
 
 
 class Solution(param.Parameterized):
-    result_name = param.ObjectSelector(
+    file_name = param.ObjectSelector(
         default="tripod.vtk",
         objects=[
             "tripod.vtk",
@@ -59,9 +59,9 @@ class Solution(param.Parameterized):
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    @param.depends("result_name")
+    @param.depends("file_name")
     def view(self):
-        result = pv.read(self.result_name)
+        result = pv.read(self.file_name)
 
         self.plotter.clear()
         self.plotter.add_mesh(result)
