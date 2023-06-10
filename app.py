@@ -37,11 +37,25 @@ class Mesh(param.Parameterized):
         )
         return iframe
 
+
 class Fem(param.Parameterized):
-    pass
+    file_name = param.ObjectSelector(
+        default="tripod.mfu",
+        objects=[
+            "tripod.mfu",
+            "tripod.mfue",
+        ],
+    )
+
 
 class Integ(param.Parameterized):
-    pass
+    file_name = param.ObjectSelector(
+        default="tripod.mim",
+        objects=[
+            "tripod.mim",
+        ],
+    )
+
 
 class Model(param.Parameterized):
     pass
@@ -61,10 +75,10 @@ class Solution(param.Parameterized):
 
     @param.depends("file_name")
     def view(self):
-        result = pv.read(self.file_name)
+        solution = pv.read(self.file_name)
 
         self.plotter.clear()
-        self.plotter.add_mesh(result)
+        self.plotter.add_mesh(solution)
         iframe = self.plotter.show(
             jupyter_backend="trame",
             jupyter_kwargs=dict(handler=self.handler),
@@ -73,26 +87,26 @@ class Solution(param.Parameterized):
         return iframe
 
 
+fem = Fem(name="Fem")
+integ = Integ(name="Integ")
 mesh = Mesh(name="Mesh")
-result = Solution(name="Solution")
+solution = Solution(name="Solution")
 
 pn.Column(
     title,
     pn.Tabs(
         (
             "Mesh",
-            pn.Row(
-                mesh.param, pn.panel(mesh.view, width=1000, height=250)
-            ),
+            pn.Row(mesh.param, pn.panel(mesh.view, width=1000, height=250)),
         ),
-        ("Fem", pn.Spacer(styles=dict(background="red"), width=500, height=1000)),
-        ("Integ", pn.Spacer(styles=dict(background="blue"), width=500, height=1000)),
+        ("Fem", fem.param),
+        ("Integ", integ.param),
         ("Model", pn.Spacer(styles=dict(background="yellow"), width=500, height=1000)),
         (
             "Solution",
             pn.Row(
-                result.param,
-                pn.panel(result.view, width=1000, height=250),
+                solution.param,
+                pn.panel(solution.view, width=1000, height=250),
             ),
         ),
     ),
