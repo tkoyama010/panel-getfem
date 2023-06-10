@@ -99,9 +99,7 @@ pn.Column(
             "Mesh",
             pn.Row(mesh.param, pn.panel(mesh.view, width=1000, height=250)),
         ),
-        ("Fem", fem.param),
-        ("Integ", integ.param),
-        ("Model", pn.Spacer(styles=dict(background="yellow"), width=500, height=1000)),
+        ("Model", pn.Row(fem.param, integ.param)),
         (
             "Solution",
             pn.Row(
