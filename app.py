@@ -42,15 +42,6 @@ class Integ(param.Parameterized):
     )
 
 
-class Model(param.Parameterized):
-    brick_name = param.ObjectSelector(
-        default="linearized elasticity brick",
-        objects=[
-            "linearized elasticity brick",
-        ],
-    )
-
-
 class Plotter(param.Parameterized):
     plotter = pv.Plotter(notebook=True)
 
@@ -83,7 +74,6 @@ button.on_click(add_brick)
 mesh = Mesh(name="Mesh")
 fem = Fem(name="Fem")
 integ = Integ(name="Integ")
-model = Model(name="Model")
 plotter = Plotter(name="Plotter")
 
 pn.Row(
@@ -91,7 +81,7 @@ pn.Row(
         (
             "Model",
             pn.Column(
-                mesh.param, fem.param, integ.param, model.param, pn.Row(button, text)
+                mesh.param, fem.param, integ.param, pn.Row(button, text)
             ),
         ),
         (
