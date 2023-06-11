@@ -69,6 +69,17 @@ class Plotter(param.Parameterized):
         return iframe
 
 
+text = pn.widgets.TextInput(value="Ready")
+button = pn.widgets.Button(name="Click me", button_type="primary")
+
+
+def add_brick(event):
+    text.value = "Clicked {0} times".format(button.clicks)
+
+
+button.on_click(add_brick)
+
+
 mesh = Mesh(name="Mesh")
 fem = Fem(name="Fem")
 integ = Integ(name="Integ")
@@ -79,7 +90,9 @@ pn.Row(
     pn.Tabs(
         (
             "Model",
-            pn.Column(mesh.param, fem.param, integ.param, model.param),
+            pn.Column(
+                mesh.param, fem.param, integ.param, model.param, pn.Row(button, text)
+            ),
         ),
         (
             "Plotter",
