@@ -17,10 +17,10 @@ class Mesh(param.Parameterized):
     )
 
     @param.depends("file_name")
-    def view(self, plotter):
+    def show(self, plotter):
         m = gf.Mesh("load", self.file_name)
         m.export_to_vtk(str(id(self)) + ".vtk", "ascii")
-        return plotter.view(str(id(self)) + ".vtk")
+        return plotter.show(str(id(self)) + ".vtk")
 
 
 class Fem(param.Parameterized):
@@ -57,7 +57,7 @@ class Plotter(param.Parameterized):
     def handler(self, viewer, src, **kwargs):
         return IFrame(src, "100%", "1000px")
 
-    def view(self, file_name):
+    def show(self, file_name):
         mesh = pv.read(file_name)
         self.plotter.clear()
         self.plotter.add_mesh(mesh)
@@ -88,5 +88,5 @@ pn.Row(
             ),
         ),
     ),
-    pn.panel(mesh.view(plotter), width=1000, height=250),
+    pn.panel(mesh.show(plotter), width=1000, height=250),
 ).show()
