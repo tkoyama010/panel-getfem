@@ -1,92 +1,86 @@
-import getfem as gf
 import panel as pn
 import param
-import pyvista as pv
-from IPython.display import IFrame
 
-pv.set_plot_theme("document")
 pn.extension()
 
 
-class Mesh(param.Parameterized):
-    file_name = param.ObjectSelector(
-        default="tripod.mesh",
-        objects=[
-            "tripod.mesh",
-        ],
-    )
-
-    @param.depends("file_name")
-    def view(self, plotter):
-        m = gf.Mesh("load", self.file_name)
-        m.export_to_vtk(str(id(self)) + ".vtk", "ascii")
-        return plotter.view(str(id(self)) + ".vtk")
-
-
-class Fem(param.Parameterized):
-    file_name = param.ObjectSelector(
-        default="tripod.mfu",
-        objects=[
-            "tripod.mfu",
-            "tripod.mfue",
-        ],
-    )
-
-
-class Integ(param.Parameterized):
-    file_name = param.ObjectSelector(
-        default="tripod.mim",
-        objects=[
-            "tripod.mim",
-        ],
-    )
-
-
 class Model(param.Parameterized):
-    brick_name = param.ObjectSelector(
-        default="linearized elasticity brick",
-        objects=[
-            "linearized elasticity brick",
-        ],
+
+    brick_list = param.List([])
+    brick = param.String()
+
+    def _add_brick(self):
+        if len(self.brick) > 0:
+            brick = Brick(parent=self, args=self.brick, name="")
+            brick.param.watch(self._delete, ["delete"])
+            self.brick_list.append(brick)
+            self.param.trigger("brick_list")
+            self.brick = ""
+
+    add_brick = param.Action(_add_brick)
+
+    def _delete(self, *events):
+        for event in events:
+            if event.name == "delete":
+                self.brick_list.remove(event.obj)
+                self.param.trigger("brick_list")
+
+
+class Brick(param.Parameterized):
+
+    delete = param.Event()
+    args = ""
+
+
+model = Model()
+
+
+@pn.depends(model.param.brick_list)
+def brick_list(brick_list):
+    message = lambda x: pn.pane.Markdown("### " + x, width=200)
+    delete = lambda x: pn.Param(
+        x,
+        widgets={
+            "delete": {
+                "widget_type": pn.widgets.Button,
+                "button_type": "danger",
+                "name": "x",
+                "width": 15,
+            }
+        },
+    )
+    return pn.Column(
+        *[
+            pn.Row(message(brick.args), delete(brick.param.delete))
+            for brick in brick_list
+        ]
     )
 
 
-class Plotter(param.Parameterized):
-    plotter = pv.Plotter(notebook=True)
-
-    def handler(self, viewer, src, **kwargs):
-        return IFrame(src, "100%", "1000px")
-
-    def view(self, file_name):
-        mesh = pv.read(file_name)
-        self.plotter.clear()
-        self.plotter.add_mesh(mesh)
-        iframe = self.plotter.show(
-            jupyter_backend="trame",
-            jupyter_kwargs=dict(handler=self.handler),
-            return_viewer=True,
-        )
-        return iframe
-
-
-mesh = Mesh(name="Mesh")
-fem = Fem(name="Fem")
-integ = Integ(name="Integ")
-model = Model(name="Model")
-plotter = Plotter(name="Plotter")
-
-pn.Row(
-    pn.Tabs(
-        (
-            "Model",
-            pn.Column(mesh.param, fem.param, integ.param, model.param),
+pn.Column(
+    pn.pane.Markdown("## Model"),
+    pn.Row(
+        pn.Param(
+            model.param.brick,
+            widgets={
+                "brick": {
+                    "widget_type": pn.widgets.TextInput,
+                    "name": "",
+                    "placeholder": "Enter a Brick...",
+                }
+            },
         ),
-        (
-            "Plotter",
-            pn.Row(
-                plotter.param,
-            ),
+        pn.Param(
+            model.param.add_brick,
+            widgets={
+                "add_brick": {
+                    "widget_type": pn.widgets.Button,
+                    "button_type": "primary",
+                    "name": "+",
+                    "width": 15,
+                }
+            },
         ),
     ),
-    pn.panel(mesh.view(plotter), width=1000, height=250),
-).show()
+    brick_list,
+).servable()
